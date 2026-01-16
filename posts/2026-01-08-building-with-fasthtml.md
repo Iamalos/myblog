@@ -1,6 +1,7 @@
 ---
 title: "Building Web Apps with FastHTML"
 date: 2026-01-08
+tags: ["engineering", "python", "fasthtml"]
 excerpt: "My experience building this blog with FastHTML and why I think it's a game-changer for Python web development."
 ---
 

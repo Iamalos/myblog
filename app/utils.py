@@ -29,6 +29,7 @@ def load_post_by_slug(slug: str) -> Optional[Dict]:
                 'slug': slug,
                 'title': post.get('title', 'Untitled'),
                 'date': post.get('date', datetime.now()),
+                'tags': post.get('tags', []),
                 'excerpt': post.get('excerpt', ''),
                 'content': markdown_to_html(post.content),
                 'raw_content': post.content
@@ -59,11 +60,54 @@ def load_all_posts() -> List[Dict]:
             'slug': slug,
             'title': post.get('title', 'Untitled'),
             'date': post.get('date', datetime.now()),
+            'tags': post.get('tags', []),
             'excerpt': post.get('excerpt', ''),
             'filename': post_file.name
         })
 
     return posts
+
+
+def get_all_tags() -> List[str]:
+    """
+    Get a list of all unique tags across all posts.
+    """
+    tags = set()
+    posts = load_all_posts()
+    for post in posts:
+        tags.update(post.get('tags', []))
+    
+    return sorted(list(tags))
+
+
+def filter_posts(posts: List[Dict], selected_cats: List[str]) -> List[Dict]:
+    """Filter posts by selected categories (AND logic)."""
+    if not selected_cats: return posts
+    return [p for p in posts if all(cat in p.get('tags', []) for cat in selected_cats)]
+
+
+def get_enabled_tags(all_posts: List[Dict], selected_cats: List[str], all_tags: List[str]) -> List[str]:
+    """
+    Calculate which tags should be enabled based on current selection.
+    Returns list of enabled tags.
+    """
+    # If no categories selected, enable all tags that appear in at least one post
+    if not selected_cats:
+        return [tag for tag in all_tags if any(tag in p.get('tags', []) for p in all_posts)]
+
+    enabled_tags = set()
+    for tag in all_tags:
+        # Already selected tags are always enabled (for removal)
+        if tag in selected_cats:
+            enabled_tags.add(tag)
+            continue
+        
+        # Check intersection: (Selected + Tag) -> must have >0 posts
+        test_cats = selected_cats + [tag]
+        if filter_posts(all_posts, test_cats):
+            enabled_tags.add(tag)
+            
+    return list(enabled_tags)
 
 
 def markdown_to_html(content: str) -> str:

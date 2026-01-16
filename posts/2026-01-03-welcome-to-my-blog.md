@@ -1,6 +1,7 @@
 ---
 title: "Welcome to My Blog"
 date: 2026-01-03
+tags: ["life", "notes"]
 excerpt: "This is my first blog post using FastHTML and MonsterUI. Learn about why I chose these technologies and what to expect from this blog."
 ---
 

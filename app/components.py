@@ -5,67 +5,109 @@ from datetime import datetime
 
 def Layout(*children, title="My Blog"):
     """
-    Main layout component with navigation and footer.
-    Clean, minimal design inspired by modern personal blogs.
+    Main layout component with floating navigation and footer.
     """
     return (
         Title(title),
-        # Sticky navigation bar
-        Div(
+        # Floating navigation bar
+        Nav(
             Div(
                 A("Ivan Dolgushev", href="/",
-                  cls="text-xl font-bold text-gray-900 hover:text-blue-600 transition-all duration-300"),
-                Nav(
-                    A("Home", href="/",
-                      cls="nav-link px-4 py-2 text-gray-700 hover:text-blue-600 hover:scale-110 transition-all duration-300"),
-                    A("About", href="/about",
-                      cls="nav-link px-4 py-2 text-gray-700 hover:text-blue-600 hover:scale-110 transition-all duration-300"),
-                    A("Contact", href="/contact",
-                      cls="nav-link px-4 py-2 text-gray-700 hover:text-blue-600 hover:scale-110 transition-all duration-300"),
-                    cls="flex gap-2 items-center"
+                  cls="text-lg font-bold text-gray-900 hover:text-blue-600 transition-colors"),
+                Div(
+                    A("Home", href="/", cls="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"),
+                    A("About", href="/about", cls="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"),
+                    A("Contact", href="/contact", cls="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"),
+                    cls="flex gap-6 items-center"
                 ),
-                cls="flex justify-between items-center py-4 px-6 max-w-4xl mx-auto"
+                cls="flex justify-between items-center w-full max-w-2xl px-6"
             ),
-            cls="sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-200 mb-8"
+            cls=("fixed top-6 left-1/2 -translate-x-1/2 z-50 "
+                 "bg-white/80 backdrop-blur-md border border-gray-200/50 "
+                 "rounded-full shadow-lg py-6 px-4 w-[90%] max-w-3xl "
+                 "transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5")
         ),
 
         # Main content area
         Container(
-            Div(
-                *children,
-                cls="max-w-4xl mx-auto py-8"
-            ),
-
+            Div(children, cls="max-w-3xl mx-auto"),
             # Footer
             Footer(
                 P(f"© {datetime.now().year} Ivan Dolgushev. Built with FastHTML & MonsterUI.",
-                  cls="text-center text-sm text-gray-500 py-8 mt-16 border-t border-gray-200"),
+                  cls="text-center text-sm text-gray-500"),
+                cls="py-12 mt-20 border-t border-gray-100"
             ),
-
-            cls="min-h-screen px-4"
+            cls="min-h-screen px-4 pt-32 pb-12 bg-gray-50/50"
         )
     )
 
 
 def PostCard(post: dict):
     """
-    Row-style post preview inspired by modern personal blogs.
-    Simple, clean design with title and date.
+    Row-style post preview where the entire card is clickable.
     """
     date_str = post['date'].strftime('%d %b %Y') if isinstance(post['date'], datetime) else str(post['date'])
 
-    return Div(
+    return A(
         Div(
-            A(post['title'], href=f"/post/{post['slug']}",
-              cls="text-xl font-medium text-gray-900 hover:text-blue-600 transition-all duration-300 hover:translate-x-1 inline-block"),
+            H3(post['title'], 
+               cls="text-xl font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-300 inline-block"),
             Span(date_str, cls="text-sm text-gray-500 ml-auto"),
             cls="flex items-baseline justify-between gap-4"
         ),
         P(post['excerpt'], cls="text-gray-600 mt-2 text-sm leading-relaxed"),
-        cls="py-6 border-b border-gray-200 hover:border-blue-300 transition-all duration-300"
+        Div(
+            *[Span(f"#{tag}", cls="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full mr-2") 
+              for tag in post.get('tags', [])],
+            cls="mt-3 flex flex-wrap"
+        ),
+        href=f"/post/{post['slug']}",
+        cls="block py-6 border-b border-gray-200 hover:border-blue-300 hover:bg-gray-50/50 -mx-4 px-4 rounded-lg transition-all duration-300 group"
     )
 
 
+
+from urllib.parse import urlencode
+
+def FilterSection(all_categories: list[str], selected_categories: list[str], enabled_categories: list[str]):
+    """
+    Visual filter section with category chips supporting multi-select.
+    Functional implementation.
+    """
+    
+    def build_url(cats):
+        return f"/?{'&'.join([f'category={c}' for c in cats])}" if cats else "/"
+
+    def chip(cat, label=None, is_all=False):
+        is_selected = cat in selected_categories
+        is_enabled = is_all or cat in enabled_categories
+        
+        # Next state logic
+        if is_all: next_cats = []
+        elif is_selected: next_cats = [c for c in selected_categories if c != cat]
+        else: next_cats = selected_categories + [cat]
+        
+        # Styles
+        if is_all: 
+            active = not selected_categories
+        else:
+            active = is_selected
+            
+        base_cls = "bg-gray-900 text-white hover:bg-gray-800" if active else \
+                   "bg-gray-100 text-gray-600 hover:bg-gray-200" if is_enabled else \
+                   "bg-gray-50 text-gray-300 cursor-not-allowed"
+                   
+        return A(label or cat.title(), 
+                href=build_url(next_cats) if is_enabled else "#",
+                cls=f"px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 {base_cls}")
+
+    return Div(
+        chip(None, label="All", is_all=True),
+        *[chip(cat) for cat in all_categories],
+        cls="flex flex-wrap gap-2 justify-center mb-12"
+    )
+
+    
 def PostContent(post: dict):
     """
     Full post content component for individual post pages.
@@ -111,34 +153,16 @@ def AboutContent():
 
 
 def ContactForm():
-    """Contact form component with styled form elements"""
+    """Contact form component with MonsterUI elements"""
     return Div(
         H1("Contact Me", cls="text-4xl font-bold mb-6"),
         Form(
-            Div(
-                Label("Name", _for="name", cls="block text-sm font-medium text-gray-700 mb-2"),
-                Input(name="name", id="name", type="text", required=True,
-                      cls="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"),
-                cls="mb-4"
-            ),
-            Div(
-                Label("Email", _for="email", cls="block text-sm font-medium text-gray-700 mb-2"),
-                Input(name="email", id="email", type="email", required=True,
-                      cls="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"),
-                cls="mb-4"
-            ),
-            Div(
-                Label("Message", _for="message", cls="block text-sm font-medium text-gray-700 mb-2"),
-                Textarea(name="message", id="message", required=True, rows=5,
-                        cls="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"),
-                cls="mb-4"
-            ),
-            Button("Send Message", type="submit",
-                   cls="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"),
-
-            method="post",
-            action="/contact/submit",
-            cls="max-w-lg bg-white shadow-lg p-8 rounded-lg"
+            LabelInput("Name", id="name", placeholder="Your name"),
+            LabelInput("Email", id="email", type="email", placeholder="your@email.com"),
+            LabelTextArea("Message", id="message", rows=5, placeholder="What's on your mind?"),
+            Button("Send Message", cls=ButtonT.primary),
+            action="/contact/submit", method="post",
+            cls="space-y-4 max-w-lg bg-white shadow-lg p-8 rounded-lg"
         )
     )
 

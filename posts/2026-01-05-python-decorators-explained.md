@@ -1,6 +1,7 @@
 ---
 title: "Understanding Python Decorators"
 date: 2026-01-05
+tags: ["engineering", "python"]
 excerpt: "A deep dive into Python decorators, how they work, and practical examples for your code. Master this powerful Python feature."
 ---
 

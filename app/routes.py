@@ -1,18 +1,27 @@
 from fasthtml.common import *
-from app.utils import load_all_posts, load_post_by_slug
-from app.components import Layout, PostCard, PostContent, AboutContent, ContactForm, NotFoundContent
+from monsterui.all import *
+from app.utils import load_all_posts, load_post_by_slug, get_all_tags, filter_posts, get_enabled_tags
+from app.components import Layout, PostCard, PostContent, AboutContent, ContactForm, NotFoundContent, FilterSection
 
 
 def setup_routes(app):
     """Setup all application routes"""
 
     @app.get("/")
-    def homepage():
+    def homepage(category: list[str] = None):
         """Homepage listing all blog posts"""
-        posts = load_all_posts()
-
+        all_posts = load_all_posts()
         # Sort by date (newest first)
-        posts.sort(key=lambda p: p['date'], reverse=True)
+        all_posts.sort(key=lambda p: p['date'], reverse=True)
+
+        # Normalize categories
+        selected_cats = [c.lower() for c in category] if category else []
+        if 'all' in selected_cats:
+            selected_cats = []
+
+        posts = filter_posts(all_posts, selected_cats)
+        all_tags = get_all_tags()
+        enabled_tags = get_enabled_tags(all_posts, selected_cats, all_tags)
 
         return Layout(
             # Hero section
@@ -22,6 +31,9 @@ def setup_routes(app):
                   cls="text-xl text-gray-600 mb-8"),
                 cls="mb-12"
             ),
+            
+            # Filter Section
+            FilterSection(all_tags, selected_cats, list(enabled_tags)),
 
             # Blog posts section
             Div(
@@ -79,7 +91,7 @@ def setup_routes(app):
                 P(f"Thanks for reaching out, {name}!", cls="text-center text-lg mb-2"),
                 P("Your message has been received. I'll get back to you soon!", cls="text-center text-gray-600 mb-6"),
                 Div(
-                    A("Back to Home", href="/", cls="btn btn-primary"),
+                    A(Button("Back to Home", cls=ButtonT.primary), href="/"),
                     cls="text-center"
                 ),
                 cls="py-12"
