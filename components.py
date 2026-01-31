@@ -9,8 +9,9 @@ from monsterui.all import *
 from datetime import datetime
 
 # %% nbs/01_components.ipynb 2
-def Layout(*children, title="My Blog"):
+def Layout(*children, title="My Blog", wide=False):
     """Main layout component with floating navigation and footer"""
+    content_cls = "max-w-5xl mx-auto" if wide else "max-w-3xl mx-auto"
     return (
         Title(title),
         # Floating navigation bar
@@ -34,7 +35,7 @@ def Layout(*children, title="My Blog"):
 
         # Main content area
         Container(
-            Div(children, cls="max-w-3xl mx-auto"),
+            Div(children, cls=content_cls),
             # Footer
             Footer(
                 P(f"© {datetime.now().year} Ivan Dolgushev. Built with FastHTML & MonsterUI.",

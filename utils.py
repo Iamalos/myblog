@@ -20,14 +20,14 @@ def load_post_by_slug(slug: str) -> Optional[Dict]:
     # Try to find the post file matching the slug
     for post_file in POSTS_DIR.glob("*.md"):
         if slug in post_file.stem: post = frontmatter.load(post_file)
-        return {
-            'slug': slug,
-            'title': post.get('title', 'Untitled'),
-            'date': post.get('date', datetime.now()),
-            'tags': post.get('tags', []),
-            'excerpt': post.get('excerpt', ''),
-            'content': post.content,
-        }
+    return {
+        'slug': slug,
+        'title': post.get('title', 'Untitled'),
+        'date': post.get('date', datetime.now()),
+        'tags': post.get('tags', []),
+        'excerpt': post.get('excerpt', ''),
+        'content': post.content,
+    }
 
     return None
 
