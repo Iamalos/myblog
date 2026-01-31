@@ -28,8 +28,7 @@ def Layout(*children, title="My Blog", wide=False):
                 cls="flex justify-between items-center w-full max-w-2xl px-6"
             ),
             cls=("fixed top-6 left-1/2 -translate-x-1/2 z-50 "
-                 "bg-white/80 backdrop-blur-md border border-gray-200/50 "
-                 "rounded-full shadow-lg py-6 px-4 w-[90%] max-w-3xl "
+                 "glass-nav rounded-full py-6 px-4 w-[90%] max-w-3xl "
                  "transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5")
         ),
 
@@ -42,7 +41,7 @@ def Layout(*children, title="My Blog", wide=False):
                   cls="text-center text-sm text-gray-500"),
                 cls="py-12 mt-20 border-t border-gray-100"
             ),
-            cls="min-h-screen px-4 pt-32 pb-12 bg-gray-50/50"
+            cls="min-h-screen px-4 pt-32 pb-12 glass-bg"
         )
     )
 
@@ -64,7 +63,7 @@ def PostCard(post: dict):
             cls="mt-3 flex flex-wrap gap-2"
         ),
         href=f"/post/{post['slug']}",
-        cls="block py-6 border-b border-gray-200 hover:border-blue-300 hover:bg-gray-50/50 -mx-4 px-4 rounded-lg transition-all group"
+        cls="block py-6 px-4 mb-4 glass-card glass-card-hover rounded-xl group"
     )
 
 # %% nbs/01_components.ipynb 4
@@ -85,13 +84,13 @@ def FilterSection(all_categories: list[str], selected_categories: list[str], ena
         elif is_selected: next_cats = [c for c in selected_categories if c != cat]
         else: next_cats = selected_categories + [cat]
   
-        cls = ("bg-gray-900 text-white hover:bg-gray-800" if is_selected else 
-                   "bg-gray-100 text-gray-600 hover:bg-gray-200" if is_enabled else 
-                   "bg-gray-50 text-gray-300 cursor-not-allowed")
-                   
+        if is_selected: cls = "glass-chip-active text-white"
+        elif is_enabled: cls = "glass-chip text-gray-700 hover:bg-white/80"
+        else: cls = "glass-chip-disabled text-gray-400"
+            
         return A(label or cat.title(), 
                 href=build_url(next_cats) if is_enabled else "#",
-                cls=f"px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 {cls}")
+                cls=f"px-4 py-2 rounded-full text-sm font-medium transition-all {cls}")
 
     return Div(
         chip(None, "All"),
@@ -118,7 +117,7 @@ def PostContent(post: dict):
               cls="inline-block px-4 py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-colors mt-12")
         ),
 
-        cls="py-8 bg-white shadow-lg p-8 rounded-lg"
+        cls="py-8 glass-card p-8 rounded-2xl"
     )
 
 # %% nbs/01_components.ipynb 6
