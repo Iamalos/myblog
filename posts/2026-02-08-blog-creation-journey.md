@@ -1,3 +1,10 @@
+---
+title: Building a Blazing-Fast Blog with FastHTML
+date: 2026-02-08
+tags: [fasthtml, python, web-development, railway]
+excerpt: How I built and deployed a modern blog using FastHTML, MonsterUI, and Railway in one afternoon.
+---
+
 - # 🚀 Building a Blazing-Fast Blog with FastHTML and Railway
 
   *Or: How I Went from Zero to Deployed in One Afternoon*
