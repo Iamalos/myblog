@@ -122,4 +122,4 @@ def debug():
 
 
 # %% nbs/03_main.ipynb #34c8ffcf-d21e-4d5b-a760-c696e4ce3873
-serve()
+serve(port=int(os.getenv('PORT', 5001)), host='0.0.0.0')
