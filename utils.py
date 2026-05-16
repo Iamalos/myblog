@@ -2,12 +2,12 @@
 
 # %% auto 0
 __all__ = ['BASE_DIR', 'POSTS_DIR', 'load_post_by_slug', 'load_all_posts', 'get_all_tags', 'filter_posts', 'get_enabled_tags',
-           'extract_slug_from_filename']
+           'extract_slug_from_filename', 'calc_read_time', 'extract_toc', 'render_post_md']
 
 # %% nbs/02_utils.ipynb 1
 from fasthtml.common import *
 import frontmatter
-# import markdown
+import re
 from pathlib import Path
 from datetime import datetime
 

@@ -84,3 +84,4 @@ projects_files/
 # ===== Folders starting with underscore =====
 _*/
 
+.lazyweb/
