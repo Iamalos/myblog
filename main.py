@@ -7,6 +7,7 @@ __all__ = ['BASE_DIR', 'STATIC_DIR', 'IN_NOTEBOOK', 'css_path', 'css_content', '
 # %% nbs/03_main.ipynb #4e05c8a0-72d9-4a9e-ba71-5d8a37f9c4b9
 from fasthtml.common import *
 from monsterui.all import *
+from starlette.responses import Response
 from components import *
 from utils import *
 
@@ -36,19 +37,35 @@ def index(category: list[str] = None):
     all_posts.sort(key=lambda p: p['date'], reverse=True)
 
     selected_cats = [c.lower() for c in category] if category else []
-    posts = filter_posts(all_posts, selected_cats)
+    featured = next((p for p in all_posts if p.get('featured')), all_posts[0] if all_posts else None)
+    remaining = [p for p in all_posts if p is not featured]
+    posts = filter_posts(remaining, selected_cats)
     all_tags = get_all_tags()
-    enabled_tags = get_enabled_tags(all_posts, selected_cats, all_tags)
+    enabled_tags = get_enabled_tags(remaining, selected_cats, all_tags)
 
-    return Layout(        
+    return Layout(
         # Hero section
         Div(
             H1("Ivan Dolgushev", cls="text-4xl font-bold mb-3 text-gray-900"),
-            P("Software engineer, writer, and technology enthusiast.",
-              cls="text-xl text-gray-600 mb-8"),
-            cls="mb-12"
+            P("I build ML systems and write about the messy parts of production machine learning, Python tooling, and the occasional side project.",
+              cls="text-xl text-gray-600 mb-5 leading-relaxed max-w-xl"),
+            Div(
+                A("GitHub", href="https://github.com/ivandolgushev",
+                  cls="text-sm font-medium text-blue-600 hover:underline"),
+                Span("·", cls="text-gray-300"),
+                A("RSS", href="/feed",
+                  cls="text-sm font-medium text-blue-600 hover:underline"),
+                Span("·", cls="text-gray-300"),
+                A("About", href="/about",
+                  cls="text-sm font-medium text-blue-600 hover:underline"),
+                cls="flex items-center gap-3"
+            ),
+            cls="mb-10"
         ),
-        
+
+        # Featured post
+        FeaturedPost(featured) if featured else Div(),
+
         # Filter Section
         FilterSection(all_tags, selected_cats, list(enabled_tags)),
 
@@ -57,7 +74,7 @@ def index(category: list[str] = None):
             H2("Recent Posts", cls="text-2xl font-bold mb-6 text-gray-900"),
             Div(
                 *[PostCard(post) for post in posts] if posts else [
-                    P("No blog posts yet. Check back soon!", cls="text-gray-600 py-6")
+                    P("No posts match this filter.", cls="text-gray-600 py-6")
                 ],
                 cls="divide-y divide-gray-200"
             ),
@@ -65,6 +82,31 @@ def index(category: list[str] = None):
         ),
         title="Ivan Dolgushev - Personal Blog"
     )
+
+@rt("/feed")
+def rss():
+    """RSS 2.0 feed of all posts"""
+    all_posts = load_all_posts()
+    all_posts.sort(key=lambda p: p['date'], reverse=True)
+    base = "https://blog-production-da01.up.railway.app"
+    items = ''.join(f"""
+    <item>
+        <title><![CDATA[{p['title']}]]></title>
+        <link>{base}/post/{p['slug']}</link>
+        <guid>{base}/post/{p['slug']}</guid>
+        <description><![CDATA[{p['excerpt']}]]></description>
+        <pubDate>{p['date'].strftime('%a, %d %b %Y 00:00:00 +0000')}</pubDate>
+    </item>""" for p in all_posts)
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Ivan Dolgushev</title>
+    <link>{base}</link>
+    <description>Writing about ML systems, Python, and side projects.</description>
+    <language>en</language>{items}
+  </channel>
+</rss>"""
+    return Response(xml, media_type="application/rss+xml")
 
 @app.get("/post/{slug}")
 def post_page(slug: str):

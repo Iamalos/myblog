@@ -145,6 +145,48 @@ button:focus-visible {
     );
 }
 
+/* ===== FEATURED POST ===== */
+
+.featured-post-card {
+    border-left: 3px solid rgba(37, 99, 235, 0.4);
+    background: rgba(255, 255, 255, 0.75);
+}
+
+/* ===== TABLE OF CONTENTS ===== */
+
+.post-with-toc {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 2rem;
+    align-items: start;
+}
+
+.toc-sticky {
+    position: sticky;
+    top: 100px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+.toc-link {
+    display: block;
+    line-height: 1.5;
+}
+
+.toc-link.toc-active {
+    color: #2563eb;
+    font-weight: 500;
+}
+
+@media (max-width: 900px) {
+    .post-with-toc {
+        display: block;
+    }
+    .toc-column {
+        display: none;
+    }
+}
+
 /* ===== PRINT STYLES ===== */
 
 @media print {

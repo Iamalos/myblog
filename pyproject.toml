@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "myblog"
+version = "0.1.0"
+description = "Personal blog built with FastHTML"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+authors = [{name = "Ivan Dolgushev", email = "ivandolgushev@gmail.com"}]
+dependencies = [
+    "python-fasthtml>=0.12.0",
+    "monsterui>=0.1.0",
+    "python-frontmatter>=1.0.0",
+    "mistletoe>=1.0.0",
+    "uvicorn>=0.25.0",
+    "nbdev>=3.0.15",
+]
+
+[tool.setuptools]
+py-modules = ["main", "components", "utils"]
+
+[project.urls]
+Repository = "https://github.com/ivandolgushev/myblog"
+
+[tool.nbdev]
+lib_path = "."
+nbs_path = "nbs"
+branch = "main"
